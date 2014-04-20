@@ -16,7 +16,17 @@
     // Insert code here to initialize your application
     self.statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
     [self.statusItem setMenu:self.statusMenu];
-    [self.statusItem setImage:[NSImage imageNamed:@"apache_off"]];
+    
+    //Get the result of command
+    NSString *httpdOutput = runCommand(@"ps aux | grep httpd | wc -l");
+    int httpDValue = [httpdOutput intValue];
+    if (httpDValue > 1) {
+        [self.statusItem setImage:[NSImage imageNamed:@"apache_on"]];
+    }
+    else {
+        [self.statusItem setImage:[NSImage imageNamed:@"apache_off"]];
+    }
+    
     [self.statusItem setHighlightMode:YES];
     
     //Launch App at login
@@ -80,6 +90,35 @@
 -(IBAction)terminate:(id)sender
 {
     [[NSApplication sharedApplication] terminate:self.statusItem.menu];
+}
+
+NSString *runCommand(NSString *commandToRun)
+{
+    NSTask *task;
+    task = [[NSTask alloc] init];
+    [task setLaunchPath: @"/bin/sh"];
+    
+    NSArray *arguments = [NSArray arrayWithObjects:
+                          @"-c" ,
+                          [NSString stringWithFormat:@"%@", commandToRun],
+                          nil];
+    [task setArguments: arguments];
+    
+    NSPipe *pipe;
+    pipe = [NSPipe pipe];
+    [task setStandardOutput: pipe];
+    
+    NSFileHandle *file;
+    file = [pipe fileHandleForReading];
+    
+    [task launch];
+    
+    NSData *data;
+    data = [file readDataToEndOfFile];
+    
+    NSString *output;
+    output = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
+    return output;
 }
 
 @end
