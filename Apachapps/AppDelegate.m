@@ -20,12 +20,13 @@
     //Get the result of command
     NSString *httpdOutput = runCommand(@"ps aux | grep httpd | wc -l");
     int httpDValue = [httpdOutput intValue];
-    if (httpDValue > 1) {
+    if (httpDValue > 2) {
         [self.statusItem setImage:[NSImage imageNamed:@"apache_on"]];
     }
     else {
         [self.statusItem setImage:[NSImage imageNamed:@"apache_off"]];
     }
+    NSLog(@"%d | %@", httpDValue, httpdOutput);
     
     [self.statusItem setHighlightMode:YES];
     
